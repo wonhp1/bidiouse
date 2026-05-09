@@ -24,6 +24,10 @@ hyperframes/node_modules/
 hyperframes/.cache/
 hyperframes/.hyperframes/
 
+# hyperframes의 외부 스킬 콘텐츠 (heygen-com/hyperframes 저작, Apache 2.0)
+# 받는 사람 환경에서 setup.sh가 `npx skills add heygen-com/hyperframes`로 직접 받음
+hyperframes/.agents/
+
 # OS / editor
 .DS_Store
 *.log

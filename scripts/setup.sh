@@ -95,6 +95,16 @@ step "7. hyperframes (npx 베이스, lockfile만 점검)"
 if [ -d "$REPO_ROOT/hyperframes" ]; then
   (cd "$REPO_ROOT/hyperframes" && npm install >/dev/null 2>&1) || true
   ok "hyperframes 프로젝트 OK"
+
+  # heygen-com/hyperframes의 보조 스킬 (Apache 2.0)을 upstream에서 직접 설치
+  # — 우리 repo는 콘텐츠를 재배포하지 않고 사용자 환경에서 npx로 받게 함
+  if [ ! -d "$REPO_ROOT/hyperframes/.agents/skills/hyperframes" ]; then
+    (cd "$REPO_ROOT/hyperframes" && npx --yes skills@latest add heygen-com/hyperframes >/dev/null 2>&1) \
+      && ok "hyperframes 보조 스킬 8개 설치됨 (heygen-com/hyperframes, Apache 2.0)" \
+      || warn "hyperframes 스킬 설치 실패 — 인터넷 연결 후 재시도"
+  else
+    ok "hyperframes 보조 스킬 이미 설치됨"
+  fi
 else
   warn "hyperframes/ 디렉토리 없음 — 'npx hyperframes init hyperframes ...'로 생성 필요"
 fi
