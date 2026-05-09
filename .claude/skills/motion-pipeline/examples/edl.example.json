@@ -1,0 +1,48 @@
+{
+  "name": "Demo Project",
+  "fps": 30,
+  "width": 1920,
+  "height": 1080,
+  "sources": [
+    {
+      "id": "s1",
+      "path": "/abs/path/footage/clip1.mov",
+      "duration": 60.0,
+      "name": "interview-take1",
+      "has_audio": true
+    },
+    {
+      "id": "s2",
+      "path": "/abs/path/footage/clip2.mov",
+      "duration": 45.0,
+      "name": "broll-city",
+      "has_audio": false
+    }
+  ],
+  "cuts": [
+    { "source_id": "s1", "in": 5.0, "out": 12.0, "name": "intro-line" },
+    { "source_id": "s2", "in": 8.0, "out": 11.5, "name": "broll-insert" },
+    { "source_id": "s1", "in": 22.5, "out": 30.0, "name": "punchline" }
+  ],
+  "overlays": [
+    {
+      "path": "/abs/path/compositions/lower-third/output/lower-third.mov",
+      "start": 1.0,
+      "duration": 4.0,
+      "lane": 1,
+      "name": "lower-third"
+    },
+    {
+      "path": "/abs/path/compositions/title-card/output/title.mov",
+      "start": 12.0,
+      "duration": 2.0,
+      "lane": 1,
+      "name": "title-card"
+    }
+  ],
+  "subtitles": [
+    { "start": 0.5, "end": 2.5, "text": "안녕하세요" },
+    { "start": 3.0, "end": 5.5, "text": "오늘 이야기는" },
+    { "start": 12.5, "end": 14.0, "text": "이렇게 마무리됩니다" }
+  ]
+}

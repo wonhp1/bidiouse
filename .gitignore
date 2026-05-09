@@ -1,0 +1,33 @@
+# 사용자별 절대경로(~/Developer/video-use)로 가는 심볼릭 — 환경마다 새로 만들 것
+.claude/skills/video-use
+
+# env / secrets
+.env
+.env.local
+*.key
+
+# raw / output 영상 (LFS 또는 클라우드로 별도 관리)
+footage/*
+!footage/.gitkeep
+
+# video-use / motion-pipeline 중간 산출물
+takes_packed.md
+project.md
+edit/
+**/edit/
+**/narration/
+*.words.json
+
+# hyperframes 빌드 산출물
+hyperframes/out/
+hyperframes/node_modules/
+hyperframes/.cache/
+hyperframes/.hyperframes/
+
+# OS / editor
+.DS_Store
+*.log
+node_modules/
+__pycache__/
+*.pyc
+.venv/

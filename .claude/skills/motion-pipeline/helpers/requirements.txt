@@ -1,0 +1,11 @@
+# Project-local Python deps for the video-pipeline skill.
+# Installed into the video-use venv so we don't pollute the upstream skill's pyproject.toml.
+#
+# Install with:
+#   uv pip install -r .claude/skills/video-pipeline/helpers/requirements.txt \
+#     --python .claude/skills/video-use/.venv/bin/python
+#
+# Re-run after `git pull` inside .claude/skills/video-use/.
+
+# Microsoft Edge TTS — free Korean/English voices, no API key
+edge-tts>=7.2.0
