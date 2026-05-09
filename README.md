@@ -1,6 +1,9 @@
-# 비디오유즈
+# 비디오유즈 ([bidiouse](https://github.com/wonhp1/bidiouse))
 
 두 모드 영상 파이프라인. **기본은 무료 / 로컬 / 키 0개.**
+
+> Repo: https://github.com/wonhp1/bidiouse
+> License: [MIT](LICENSE)
 
 | 모드                    | 입력                   | 산출물                                   |
 | ----------------------- | ---------------------- | ---------------------------------------- |
@@ -66,6 +69,11 @@ cd hyperframes && npx hyperframes upgrade
 
 ## 라이선스 / 출처
 
-- [browser-use/video-use](https://github.com/browser-use/video-use) — 외부 스킬, ~/Developer/video-use에 clone
+이 repo: [MIT](LICENSE) — 자유롭게 사용/수정/재배포 가능 (라이선스 문구만 보존).
+
+외부 의존 (setup.sh가 받는 사람 환경에 직접 설치):
+
+- [browser-use/video-use](https://github.com/browser-use/video-use) — `~/Developer/video-use`에 clone되는 외부 스킬
 - [heygen-com/hyperframes](https://github.com/heygen-com/hyperframes) — Apache 2.0
-- 이 repo의 `motion-pipeline` 스킬과 helpers — 옆 프로젝트(`/영상편집 video-use`)의 검증된 video-pipeline을 이식
+- [Microsoft Edge TTS](https://github.com/rany2/edge-tts) — GPL-3.0 (Python 클라이언트)
+- [ffmpeg](https://ffmpeg.org/) — LGPL/GPL (시스템 설치)
