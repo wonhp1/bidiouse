@@ -110,6 +110,35 @@ FCP가 "각각의 미디어가 없는 유효하지 않은 편집입니다"를 �
 
 자세한 흐름은 [.claude/skills/motion-pipeline/SKILL.md](.claude/skills/motion-pipeline/SKILL.md)의 "자막 수정 워크플로우" 섹션.
 
+### NLE별 임포트 절차 (사용자 지원 시 안내)
+
+산출물 두 NLE 파일은 임포트 방식이 다르다. 사용자가 NLE를 명시하면 그쪽 가이드만:
+
+**Final Cut Pro**:
+
+- `파일 → 가져오기 → XML` → `footage/edit/timeline.fcpxml`
+- 컷 + 인포그래픽 자막 mov(V2) + caption track 모두 자동 포함
+- caption 편집: `타임라인 인덱스`(⌘⇧2) → "캡션" 탭 → 클릭으로 편집
+- FCP 11+에서는 `윈도우 → 작업공간에서 보기 → 캡션`이 별도 항목 없을 수 있음 → 타임라인 인덱스로
+
+**Premiere Pro**:
+
+- `파일 → 가져오기` → `footage/edit/timeline.xml`
+- 컷 + 인포그래픽 자막 mov(V2) 자동 포함
+- caption은 **별도 import 필요**: `Window → Captions` 패널 → 햄버거 메뉴 → Import → `footage/edit/subtitles.srt`
+- FCP7 XML 형식이 caption track 미지원 → Premiere에서는 SRT 별도 첨부
+
+### 자막 두 종류 동시 사용 (인포그래픽 + caption track 하이브리드)
+
+두 자막 트랙을 동시에 보존하면 사용자가 NLE 안에서 텍스트 편집 인터페이스 유지 + 인포그래픽 디자인도 유지:
+
+- **V2 overlay**: 인포그래픽 mov (디자인된 자막, 정중앙)
+- **Caption track / SRT**: NLE 자체 자막 (단순 텍스트, 하단 중앙, 편집 가능)
+
+EDL의 `overlays`(mov 16개) + `subtitles`(텍스트 51개) 둘 다 채우면 양쪽 다 들어감. 이미 `update_edl_overlays.py`와 `subtitles_to_srt.py`로 자동 처리.
+
+화면에 둘 다 보이는 게 부담스러우면 사용자가 NLE에서 V2 트랙 비활성화 또는 caption 트랙 비활성화로 선택 가능.
+
 ## 외부 의존 (받는 사람이 사전 설치 필요)
 
 - macOS 권장 (M-series Apple Silicon이면 더 빠름). Linux도 동작.

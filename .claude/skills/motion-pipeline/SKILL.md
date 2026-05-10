@@ -198,6 +198,29 @@ per-segment 오버라이드가 top-level 기본값보다 우선.
 
 수정 후 동일하게 `bash scripts/rerender_subtitles.sh` — 새 디자인 적용된 mov가 양 NLE 파일에 자동 반영.
 
+### 하이브리드 자막 (인포그래픽 + caption track 동시)
+
+NLE 안 텍스트 편집 인터페이스를 살리려면 EDL의 `overlays`(인포그래픽 mov 16개)와 `subtitles`(텍스트 51개)를 **둘 다** 채운다. 양 NLE 파일에 두 종류 자막이 모두 들어감:
+
+| 자막 종류                        | 위치      | 디자인                   | NLE 안 편집                                      |
+| -------------------------------- | --------- | ------------------------ | ------------------------------------------------ |
+| **V2 인포그래픽 mov** (overlays) | 정중앙    | 글래스모피즘 + GSAP 모션 | ❌ (영상이라 수정 불가, SRT → 재렌더)            |
+| **Caption track** (subtitles)    | 하단 중앙 | NLE 기본 자막 스타일     | ✅ 직접 편집 (FCP 자막 패널 / Premiere Captions) |
+
+EDL에 두 필드 같이 채우는 방식 (재렌더 후 또는 수동):
+
+```python
+edl["overlays"] = [...]   # 인포그래픽 mov 16개 (update_edl_overlays.py가 자동)
+edl["subtitles"] = [
+    {"start": p["start"], "end": p["end"], "text": p["text"]}
+    for p in subtitles_json
+]
+```
+
+이후 `bash scripts/export_nle_files.sh`로 양 NLE 파일 재생성. FCPXML은 `<caption lane="-1">` ITT track으로, Premiere XML은 caption 미지원이라 별도 SRT 활용.
+
+화면에 둘 다 보이는 게 부담스러우면 사용자가 NLE에서 V2 비활성화 또는 caption 비활성화로 선택.
+
 ### Hard Rules (자막 워크플로우 한정)
 
 1. **subtitles.srt가 single source of truth** — JSON / index.html / mov는 모두 SRT에서 파생. 사용자가 SRT만 편집한다.

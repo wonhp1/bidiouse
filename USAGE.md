@@ -250,6 +250,31 @@ bash scripts/export_nle_files.sh
 
 `timeline.fcpxml` + `timeline.xml` 둘 다 한 번에 생성. 자막을 수정하거나 컷을 조정한 뒤에도 같은 명령으로 양쪽 파일 동기화.
 
+### Q. NLE에 import한 후 자막 편집 인터페이스가 안 보여요
+
+**Final Cut Pro 11.x**:
+`타임라인 인덱스`(`⌘⇧2`) 열기 → 패널 상단의 "캡션" 탭 클릭 → 51개 자막 텍스트 일람 → 클릭 또는 더블클릭으로 편집.
+(FCP 11에서는 `윈도우 → 작업공간에서 보기 → 캡션` 메뉴가 사라져서 타임라인 인덱스에 통합됨)
+
+**Premiere Pro**:
+`Window → Captions` → Captions 패널 햄버거 메뉴 → `Import Captions` → `footage/edit/subtitles.srt` 선택 → "Open Captions" 스타일 → import 후 텍스트 더블클릭으로 편집.
+(`timeline.xml`은 FCP7 XML 형식이라 caption track이 안 들어감 — SRT 별도 import 필수)
+
+### Q. 자막이 두 종류 다 보여요 (인포그래픽 + 일반 자막 동시)
+
+이건 **의도된 하이브리드 동작**. 두 가지가 동시에 들어가 있음:
+
+- **V2 트랙**: hyperframes 인포그래픽 자막 mov (정중앙, 디자인 보존, 편집 불가)
+- **Caption track / SRT 자막**: NLE 자체 자막 (하단 중앙, NLE 안에서 직접 편집 가능)
+
+원하는 동작에 따라:
+
+| 원함                 | NLE에서                                                                                        |
+| -------------------- | ---------------------------------------------------------------------------------------------- |
+| 인포그래픽만 보이게  | Caption track 비활성화 (FCP: Roles에서 Caption 끄기, Premiere: Captions 패널에서 트랙 disable) |
+| 일반 자막만 보이게   | V2 트랙 비활성화 (`V` 키 또는 마우스 우클릭 → Disable)                                         |
+| 둘 다 (현재 default) | 그대로 두기 — 인포그래픽은 시각용, caption은 텍스트 편집/검색 인터페이스용                     |
+
 ### Q. 모션그래픽이 마음에 안 들어요
 
 `hyperframes/<segment-id>/index.html`을 직접 수정하면 됩니다. HTML/CSS/JS라 ChatGPT/Claude에게 "더 화려하게", "색을 빨강으로" 같은 자연어 요청도 통합니다. 수정 후 `npm run render`로 재렌더, EDL은 그대로 둬서 동일 위치/타이밍 유지.

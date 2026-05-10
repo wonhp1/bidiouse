@@ -10,7 +10,14 @@
 | **A — 풋티지 편집**     | `footage/` 의 raw 영상 | 트랜스크립트 기반 컷 + 자막 + 모션그래픽 |
 | **B — 스크립트 → 영상** | 스크립트 .md/.txt      | Edge TTS 내레이션 + 모션그래픽 비주얼    |
 
-두 모드 모두 **dual deliverable** — `footage/edit/final.mp4` + `footage/edit/timeline.fcpxml`(Final Cut Pro 임포트용).
+두 모드 모두 **triple deliverable** — `footage/edit/`에 다음 세 파일 생성:
+
+- `final.mp4` — 자막 번인된 완성본
+- `timeline.fcpxml` — **Final Cut Pro** 임포트용 (컷 + 인포그래픽 자막 V2 overlay + caption track)
+- `timeline.xml` — **Premiere Pro** 임포트용 (FCP7 XML, 컷 + 인포그래픽 자막 V2 overlay)
+- (보조) `subtitles.srt` — Premiere Captions 패널 import용, 또는 어디서든 사용 가능
+
+**자막 텍스트 수정**도 명령 한 줄로 자동화 — SRT 편집 → `bash scripts/rerender_subtitles.sh` → 양 NLE 파일 동시 갱신.
 
 ## 빠른 시작
 
@@ -43,13 +50,18 @@ bash scripts/setup.sh
 ├── .claude/skills/
 │   ├── motion-pipeline/        ← 두 모드 오케스트레이션 (이 프로젝트의 핵심 스킬)
 │   │   ├── SKILL.md
-│   │   ├── helpers/            ← batch_tts, edl_to_fcpxml, concat_segments, ...
+│   │   ├── helpers/            ← edl_to_fcpxml, edl_to_fcp7_xml, batch_tts,
+│   │   │                          subtitles_to_srt, build_subtitle_html,
+│   │   │                          split_subtitles_by_cuts, update_edl_overlays, ...
 │   │   └── examples/edl.example.json
 │   └── video-use → ~/Developer/video-use   (프로젝트 로컬 심볼릭, gitignore 됨)
 ├── footage/                    ← raw 영상(A) 또는 산출물(B). edit/ 하위는 자동 생성
 ├── hyperframes/                ← hyperframes 컴포지션 프로젝트 + .agents/skills/
-├── scripts/setup.sh            ← 멱등 셋업 자동화
-├── USAGE.md                    ← 모드별 단계별 사용법 + FAQ + 트러블슈팅
+├── scripts/
+│   ├── setup.sh                ← 멱등 셋업 자동화
+│   ├── export_nle_files.sh     ← EDL → FCPXML + Premiere XML 동시 export
+│   └── rerender_subtitles.sh   ← SRT 수정 → 자막 mov 재렌더 + 양 NLE 갱신
+├── USAGE.md                    ← 모드별 단계별 사용법 + 자막 편집 + FAQ + 트러블슈팅
 ├── ENV_KEYS.md                 ← (선택) ElevenLabs 키 안내
 └── README.md
 ```
