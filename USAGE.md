@@ -264,6 +264,70 @@ bash scripts/setup.sh
 
 ---
 
+## 자막 텍스트 수정 워크플로우 (옵션 1 — SRT 편집 → 자동 재렌더)
+
+자막은 인포그래픽 mov(영상)이라 영상 안의 텍스트 직접 수정 불가. 디자인 100% 보존하면서 텍스트만 바꾸는 가장 빠른 길은 **SRT 편집 → 명령 한 줄로 자동 재렌더**.
+
+### 1단계: SRT 편집
+
+`footage/edit/subtitles.srt`를 텍스트 에디터로 열어서 **텍스트만 수정**(타이밍은 그대로 두거나 필요 시 조정).
+
+```
+1
+00:00:00,603 --> 00:00:02,868
+걸 입증해 줄 거야         ← 이 부분을 수정
+
+2
+00:00:02,868 --> 00:00:04,928
+저 오늘 와서 아무것도 모르는데
+```
+
+추천 에디터:
+
+- **VS Code, Sublime, 메모장** — 단순 편집
+- **[Aegisub](https://aegisub.org/)** (무료) — 자막 전용 에디터, 미리보기 가능
+- **[Subtitle Edit](https://www.nikse.dk/subtitleedit)** — 동기화 도구 풍부
+- **우리 채팅** — "5번 자막을 'XX'로 바꿔줘" 요청
+
+### 2단계: 명령 한 줄로 자동 재렌더
+
+```bash
+bash scripts/rerender_subtitles.sh
+```
+
+자동 6단계:
+
+```
+1. SRT → subtitles.json (텍스트 갱신)
+2. subtitles.json → hyperframes/index.html (caption clip 재생성)
+3. hyperframes lint
+4. 4K alpha mov 렌더 (5–15분)
+5. mov를 cut별로 분할
+6. EDL overlays 갱신 → timeline.fcpxml + timeline.xml 양 NLE 파일 동시 갱신
+```
+
+### 3단계: NLE에서 swap
+
+NLE에서 `timeline.fcpxml`(FCP) 또는 `timeline.xml`(Premiere) 다시 import. 자막 텍스트가 바뀐 새 영상 받음.
+
+### 빠른 검증 (렌더 없이 lint만)
+
+SRT 수정이 자막 컴포지션을 깨뜨리지 않는지 확인:
+
+```bash
+bash scripts/rerender_subtitles.sh --lint-only
+```
+
+5초 내 완료. lint 통과하면 본 재렌더 진행해도 안전.
+
+### 디자인 자체 변경
+
+`hyperframes/index.html`의 CSS는 매 재렌더 시 [.claude/skills/motion-pipeline/helpers/build_subtitle_html.py](.claude/skills/motion-pipeline/helpers/build_subtitle_html.py)의 `TEMPLATE`이 덮어씁니다.
+
+폰트, 색상, 박스 스타일, 모션 등 디자인을 바꾸려면 그 파일의 CSS를 수정 후 `bash scripts/rerender_subtitles.sh` 재실행.
+
+---
+
 ## 트러블슈팅
 
 ### `edge-tts` import 실패

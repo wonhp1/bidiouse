@@ -1,65 +1,287 @@
 <!doctype html>
-<html lang="en" data-resolution="landscape">
+<html lang="ko" data-resolution="landscape-4k">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=1920, height=1080" />
+    <meta name="viewport" content="width=3840, height=2160" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
     <style>
-      * {
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
         margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-      html,
-      body {
-        margin: 0;
-        width: 1920px;
-        height: 1080px;
+        width: 3840px;
+        height: 2160px;
         overflow: hidden;
-        background: #000;
+        background: transparent;
+        font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+      }
+      #root { position: relative; width: 100%; height: 100%; }
+
+      .caption {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        max-width: 3072px;
+        width: max-content;
+        pointer-events: none;
+        will-change: opacity, transform, filter;
+      }
+
+      .caption-inner {
+        position: relative;
+        padding: 36px 88px 36px 110px;
+        background: rgba(12, 14, 22, 0.72);
+        backdrop-filter: blur(28px) saturate(140%);
+        -webkit-backdrop-filter: blur(28px) saturate(140%);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 32px;
+        box-shadow:
+          0 24px 80px rgba(0, 0, 0, 0.55),
+          0 2px 4px rgba(0, 0, 0, 0.35),
+          inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        overflow: hidden;
+        max-width: 3072px;
+      }
+
+      .caption-inner::after {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 1px;
+        background: linear-gradient(90deg,
+          rgba(255,255,255,0) 0%,
+          rgba(255,255,255,0.4) 50%,
+          rgba(255,255,255,0) 100%);
+      }
+
+      .caption-inner::before {
+        content: '';
+        position: absolute;
+        left: 48px; top: 50%;
+        width: 14px; height: 14px;
+        margin-top: -7px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 30% 30%, #ffffff 0%, #c9d4ff 60%, #6478ff 100%);
+        box-shadow:
+          0 0 24px rgba(180, 200, 255, 0.85),
+          0 0 6px rgba(255, 255, 255, 1);
+      }
+
+      .caption-text {
+        font-weight: 800;
+        font-size: 92px;
+        line-height: 1.22;
+        letter-spacing: -0.025em;
+        color: #ffffff;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+        white-space: nowrap;
+        max-width: 2800px;
+        overflow: hidden;
+      }
+
+      .caption-inner.wrap .caption-text {
+        white-space: normal;
+        text-align: center;
+        max-width: 2800px;
       }
     </style>
-  
-<script>
-window.__tailwindReady=new Promise(function(resolve){
-var loaded=document.readyState==="complete";
-var resolved=false;
-var observer;
-function readTailwindCss(){var styles=document.querySelectorAll("style");for(var i=styles.length-1;i>=0;i--){var text=styles[i].textContent||"";if(text.indexOf("tailwindcss v")!==-1)return text;}return "";}
-function finish(){if(resolved||!loaded||!readTailwindCss())return;resolved=true;if(observer)observer.disconnect();resolve(true);}
-observer=new MutationObserver(finish);
-observer.observe(document.documentElement,{childList:true,subtree:true,characterData:true});
-if(loaded){finish();}else{window.addEventListener("load",function(){loaded=true;finish();},{once:true});}
-});
-</script>
-<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.2.4/dist/index.global.js" integrity="sha384-v5YF9xS+gLRWdvrQ0u/WRbCkjSIH0NjHIPe8tBL1ZRrmI7PiSH6LLdzs0aAIMCuh" crossorigin="anonymous"></script>
-</head>
+  </head>
   <body>
     <div
       id="root"
-      data-composition-id="main"
+      data-composition-id="subtitles"
       data-start="0"
-      data-duration="10"
-      data-width="1920"
-      data-height="1080"
+      data-duration="114.9610"
+      data-width="3840"
+      data-height="2160"
     >
-      
-      
-
-      <!--
-        Add your clips here. Example:
-        <div id="title" class="clip" data-start="0" data-duration="5" data-track-index="1"
-             style="font-size: 64px; color: #fff; padding: 40px">
-          Hello World
-        </div>
-      -->
+      <div class="clip caption" id="cap-1" data-start="0.603" data-duration="2.225" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">걸 입증해 줄 거야</span></div>
+      </div>
+      <div class="clip caption" id="cap-2" data-start="2.868" data-duration="2.020" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">저 오늘 와서 아무것도 모르는데</span></div>
+      </div>
+      <div class="clip caption" id="cap-3" data-start="4.928" data-duration="1.044" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">경훈님이</span></div>
+      </div>
+      <div class="clip caption" id="cap-4" data-start="7.260" data-duration="1.040" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">한번</span></div>
+      </div>
+      <div class="clip caption" id="cap-5" data-start="9.029" data-duration="2.120" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">자기소개 한번 간단하게 해 주세요</span></div>
+      </div>
+      <div class="clip caption" id="cap-6" data-start="11.189" data-duration="2.006" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">안녕하세요 저는 유튜브</span></div>
+      </div>
+      <div class="clip caption" id="cap-7" data-start="13.235" data-duration="1.432" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">PD를 하고 있는</span></div>
+      </div>
+      <div class="clip caption" id="cap-8" data-start="15.699" data-duration="2.217" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">조금만 더 들어주세요 저는 유튜브</span></div>
+      </div>
+      <div class="clip caption" id="cap-9" data-start="17.956" data-duration="2.213" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">PD를 하고 마케팅을</span></div>
+      </div>
+      <div class="clip caption" id="cap-10" data-start="20.209" data-duration="1.002" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">하고 있는</span></div>
+      </div>
+      <div class="clip caption" id="cap-11" data-start="23.400" data-duration="1.537" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">전에 경훈님을</span></div>
+      </div>
+      <div class="clip caption" id="cap-12" data-start="24.977" data-duration="1.606" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">만나게</span></div>
+      </div>
+      <div class="clip caption" id="cap-13" data-start="26.623" data-duration="2.172" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">됐는데 코딩으로</span></div>
+      </div>
+      <div class="clip caption" id="cap-14" data-start="28.835" data-duration="2.081" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">바이브코딩으로 이런 거까지 된다고</span></div>
+      </div>
+      <div class="clip caption" id="cap-15" data-start="30.956" data-duration="2.693" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">말씀하시는 거예요 제가 생각하기에는</span></div>
+      </div>
+      <div class="clip caption" id="cap-16" data-start="33.689" data-duration="1.800" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">말이 안 되는데 사기다</span></div>
+      </div>
+      <div class="clip caption" id="cap-17" data-start="36.810" data-duration="2.163" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">어쨌든 오늘 와서</span></div>
+      </div>
+      <div class="clip caption" id="cap-18" data-start="39.710" data-duration="1.891" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">배운 지는 몇 번째인가요? 저는</span></div>
+      </div>
+      <div class="clip caption" id="cap-19" data-start="41.641" data-duration="1.808" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">처음이고 세 시간 지금</span></div>
+      </div>
+      <div class="clip caption" id="cap-20" data-start="43.489" data-duration="2.255" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">배웠는데 여기 보이시려는</span></div>
+      </div>
+      <div class="clip caption" id="cap-21" data-start="45.784" data-duration="2.360" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">보이시지 않겠지만 제가 지금</span></div>
+      </div>
+      <div class="clip caption" id="cap-22" data-start="48.184" data-duration="2.101" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">세 시간만에 배워서 글을 자동</span></div>
+      </div>
+      <div class="clip caption" id="cap-23" data-start="50.325" data-duration="2.563" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">발행했습니다 블로그를 그래서</span></div>
+      </div>
+      <div class="clip caption" id="cap-24" data-start="52.928" data-duration="2.142" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">이게 너무 신기하다</span></div>
+      </div>
+      <div class="clip caption" id="cap-25" data-start="55.110" data-duration="0.800" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">다른</span></div>
+      </div>
+      <div class="clip caption" id="cap-26" data-start="57.032" data-duration="0.992" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">있으신가요?</span></div>
+      </div>
+      <div class="clip caption" id="cap-27" data-start="59.200" data-duration="2.081" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">상상력이 되게 많아 하고</span></div>
+      </div>
+      <div class="clip caption" id="cap-28" data-start="61.321" data-duration="2.186" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">싶은 게 되게 많은 사람들은 한 번쯤은</span></div>
+      </div>
+      <div class="clip caption" id="cap-29" data-start="63.547" data-duration="2.372" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">경훈님 모임에 와서 이걸 한번</span></div>
+      </div>
+      <div class="clip caption" id="cap-30" data-start="65.959" data-duration="2.204" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">배워보셔라 저는 예전에</span></div>
+      </div>
+      <div class="clip caption" id="cap-31" data-start="68.203" data-duration="2.480" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">들어서 글을 좋아하는 사람이니까</span></div>
+      </div>
+      <div class="clip caption" id="cap-32" data-start="70.723" data-duration="2.082" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">글쓰기를 자동으로 발행할 수</span></div>
+      </div>
+      <div class="clip caption" id="cap-33" data-start="72.845" data-duration="2.250" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">있을까 이잖아요 예를 들면 모르시는</span></div>
+      </div>
+      <div class="clip caption" id="cap-34" data-start="75.135" data-duration="2.398" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">분들을 위해서 설명하자면 블로그를</span></div>
+      </div>
+      <div class="clip caption" id="cap-35" data-start="77.573" data-duration="1.941" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">쓰려면 로그인하고</span></div>
+      </div>
+      <div class="clip caption" id="cap-36" data-start="79.554" data-duration="2.296" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">들어가서 이미지 넣고 글 쓰고</span></div>
+      </div>
+      <div class="clip caption" id="cap-37" data-start="81.890" data-duration="2.064" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">손으로 쓰고 생각해야 되고 발행</span></div>
+      </div>
+      <div class="clip caption" id="cap-38" data-start="83.994" data-duration="2.084" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">버튼까지 눌러야 되고 보통은 못</span></div>
+      </div>
+      <div class="clip caption" id="cap-39" data-start="86.118" data-duration="2.447" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">하시는 분들은 한 시간씩</span></div>
+      </div>
+      <div class="clip caption" id="cap-40" data-start="88.605" data-duration="2.106" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">걸린단 말이에요 근데</span></div>
+      </div>
+      <div class="clip caption" id="cap-41" data-start="90.751" data-duration="2.000" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">그거를 지금은 3분 만에</span></div>
+      </div>
+      <div class="clip caption" id="cap-42" data-start="92.791" data-duration="2.194" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">발행이 되게 된 거죠 자동으로</span></div>
+      </div>
+      <div class="clip caption" id="cap-43" data-start="95.025" data-duration="2.218" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">그런 과정들을 경훈님께서 하셨는데</span></div>
+      </div>
+      <div class="clip caption" id="cap-44" data-start="97.283" data-duration="2.093" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">정말 알려주시는 분이다 그래서 내가</span></div>
+      </div>
+      <div class="clip caption" id="cap-45" data-start="99.416" data-duration="2.407" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">엄청 하고 싶은 게 많은 사람이라면</span></div>
+      </div>
+      <div class="clip caption" id="cap-46" data-start="101.863" data-duration="2.080" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">구현하고 싶은 게 많은 사람이라면</span></div>
+      </div>
+      <div class="clip caption" id="cap-47" data-start="103.971" data-duration="2.013" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">개쫀다 그러니까</span></div>
+      </div>
+      <div class="clip caption" id="cap-48" data-start="106.024" data-duration="2.342" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">이런 표현을 좀 제 감정을</span></div>
+      </div>
+      <div class="clip caption" id="cap-49" data-start="108.406" data-duration="0.800" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">담아서</span></div>
+      </div>
+      <div class="clip caption" id="cap-50" data-start="109.964" data-duration="2.577" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">감사합니다</span></div>
+      </div>
+      <div class="clip caption" id="cap-51" data-start="112.581" data-duration="2.380" data-track-index="0">
+        <div class="caption-inner"><span class="caption-text">아주 깔끔하게</span></div>
+      </div>
     </div>
 
     <script>
+      document.querySelectorAll('.caption').forEach(function (el) {
+        var inner = el.querySelector('.caption-inner');
+        var text = inner.querySelector('.caption-text');
+        if (text && text.textContent.length > 16) inner.classList.add('wrap');
+      });
+
       window.__timelines = window.__timelines || {};
-      const tl = gsap.timeline({ paused: true });
-      // Example: tl.from("#title", { opacity: 0, y: -50, duration: 1 }, 0);
-      window.__timelines["main"] = tl;
+      var tl = gsap.timeline({ paused: true });
+
+      document.querySelectorAll('.caption').forEach(function (el) {
+        var start = parseFloat(el.dataset.start);
+        var dur = parseFloat(el.dataset.duration);
+        var inner = el.querySelector('.caption-inner');
+
+        gsap.set(inner, { opacity: 0, scale: 0.94, y: 28, filter: 'blur(14px)' });
+
+        tl.to(inner,
+          { opacity: 1, scale: 1, y: 0, filter: 'blur(0px)', duration: 0.42, ease: 'expo.out' },
+          start);
+
+        var exitAt = start + Math.max(dur - 0.32, dur * 0.7);
+        tl.to(inner,
+          { opacity: 0, y: -22, filter: 'blur(7px)', duration: 0.3, ease: 'power1.in' },
+          exitAt);
+      });
+
+      window.__timelines["subtitles"] = tl;
     </script>
   </body>
 </html>
