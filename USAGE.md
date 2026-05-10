@@ -83,12 +83,15 @@ motion-pipeline 스킬이 자동 트리거되어 다음을 수행:
 5. **렌더** — 각 segment 합성물을 mov(알파)+mp4 두 포맷으로
 6. **EDL 작성** — `footage/edit/edl.json`
 7. **ffmpeg concat** — `footage/edit/final.mp4`
-8. **EDL → FCPXML** — `footage/edit/timeline.fcpxml` (Final Cut Pro 임포트용)
+8. **EDL → 양 NLE 파일** (`bash scripts/export_nle_files.sh`):
+   - `footage/edit/timeline.fcpxml` (Final Cut Pro)
+   - `footage/edit/timeline.xml` (Premiere Pro, FCP7 XML)
 
 ### Step 3 — 산출물 확인
 
-- `footage/edit/final.mp4` — 완성본
-- `footage/edit/timeline.fcpxml` — FCP에서 추가 편집할 때 임포트
+- `footage/edit/final.mp4` — 완성본 (자막 번인된 영상)
+- `footage/edit/timeline.fcpxml` — **Final Cut Pro** 임포트용 (컷 + 자막 V2 overlay)
+- `footage/edit/timeline.xml` — **Premiere Pro** 임포트용 (FCP7 XML, 컷 + 자막 V2 overlay)
 - `hyperframes/<id>/index.html` — 각 모션그래픽 소스 (재렌더 가능)
 
 ### 수동 명령어 (필요 시)
@@ -144,7 +147,9 @@ motion-pipeline 스킬이 자동 수행:
 5. **단어 경계 스냅** — 컷 edge가 단어 안에 떨어지지 않도록 정렬 (Hard Rule 6/7)
 6. **모션그래픽 병렬 렌더** — 로어써드/타이틀/트랜지션을 hyperframes 컴포지션으로 sub-agent 병렬 작업
 7. **ffmpeg 합성** — segment 추출 → 오버레이 → `-c copy` concat → 30ms afade → 컬러 → **자막은 마지막에 번인** → `final.mp4`
-8. **EDL → FCPXML**
+8. **EDL → 양 NLE 파일** (`bash scripts/export_nle_files.sh`)
+   - `footage/edit/timeline.fcpxml` (Final Cut Pro)
+   - `footage/edit/timeline.xml` (Premiere Pro)
 9. 자기평가 루프 (최대 3회 fix+재렌더)
 
 ### 수동 명령어 (필요 시)
@@ -223,6 +228,27 @@ hyperframes가 Whisper large-v3 모델(약 3GB)을 처음 한 번 다운로드�
 ### Q. FCPXML이 뭐고 왜 필요한가?
 
 Final Cut Pro X가 임포트할 수 있는 타임라인 형식. `final.mp4`로 끝내도 되지만, FCP에서 추가 다듬기를 하고 싶으면 `timeline.fcpxml`을 임포트하면 컷·오버레이·자막이 모두 재현됨. 원본 클립 참조라 비파괴 편집 가능.
+
+### Q. Premiere Pro에서도 쓸 수 있나?
+
+✅ 가능. 매 작업마다 `timeline.xml`(FCP7 XML)도 함께 생성됩니다.
+
+| NLE               | 임포트 방법                             | 자막                            |
+| ----------------- | --------------------------------------- | ------------------------------- |
+| **Final Cut Pro** | File → Import → XML → `timeline.fcpxml` | V2 connected clip으로 자동 포함 |
+| **Premiere Pro**  | File → Import → `timeline.xml`          | V2 트랙으로 자동 포함           |
+
+자막 mov는 ProRes 4444 알파라 양 NLE 모두 배경 자동 인식. 추가 수정 없이 바로 편집 가능.
+
+### Q. 두 NLE 파일을 어떻게 한 번에 만드나?
+
+EDL이 만들어진 뒤:
+
+```bash
+bash scripts/export_nle_files.sh
+```
+
+`timeline.fcpxml` + `timeline.xml` 둘 다 한 번에 생성. 자막을 수정하거나 컷을 조정한 뒤에도 같은 명령으로 양쪽 파일 동기화.
 
 ### Q. 모션그래픽이 마음에 안 들어요
 

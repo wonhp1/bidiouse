@@ -1,6 +1,6 @@
 ---
 name: motion-pipeline
-description: video-use(컷 편집·자막·컬러)와 hyperframes(HTML→비디오 모션그래픽)를 결합한 두 모드 파이프라인. Mode A는 raw 풋티지를 편집(트랜스크립트 기반 컷·컬러·자막), Mode B는 스크립트에서 영상을 생성(Edge TTS 내레이션 + hyperframes 모션그래픽, 풋티지 없음). 두 모드 모두 dual deliverable(final.mp4 + timeline.fcpxml). 사용자가 "이 영상 편집해줘", "타이틀/로어써드 추가", "스크립트로 한국어 릴스/숏폼 만들기" 요청하면 트리거. 기본은 무료 워크플로우(hyperframes Whisper + Edge TTS), ElevenLabs Scribe는 선택사항(다중 화자 또는 한국어 필러 자동컷이 핵심일 때만).
+description: video-use(컷 편집·자막·컬러)와 hyperframes(HTML→비디오 모션그래픽)를 결합한 두 모드 파이프라인. Mode A는 raw 풋티지를 편집(트랜스크립트 기반 컷·컬러·자막), Mode B는 스크립트에서 영상을 생성(Edge TTS 내레이션 + hyperframes 모션그래픽, 풋티지 없음). 두 모드 모두 NLE 양쪽 export(timeline.fcpxml + timeline.xml — Final Cut Pro와 Premiere Pro 둘 다 호환) + final.mp4. 사용자가 "이 영상 편집해줘", "타이틀/로어써드 추가", "스크립트로 한국어 릴스/숏폼 만들기" 요청하면 트리거. 기본은 무료 워크플로우(hyperframes Whisper + Edge TTS), ElevenLabs Scribe는 선택사항(다중 화자 또는 한국어 필러 자동컷이 핵심일 때만).
 ---
 
 # Motion Pipeline (video-use × hyperframes)
@@ -37,7 +37,16 @@ video-use SKILL.md의 Hard Rules는 **무조건** 따른다. 이 파일은 두 �
 - **풋티지 위치**: `./footage/` (사용자가 원하는 경로 지정 OK). 출력은 `<videos_dir>/edit/`.
 - **hyperframes 합성물 위치**: `./hyperframes/<composition-name>/`. 새 컴포지션은 `cd hyperframes && npx hyperframes init <name>`.
 - **오버레이 포맷**: ProRes 4444 .mov(알파 보존, FCP용) **+** mp4(ffmpeg 번인용) 둘 다 렌더.
-- **Dual deliverable**: 매 실행마다 두 산출물 — `./footage/edit/final.mp4`(완성본) + `./footage/edit/timeline.fcpxml`(FCP 임포트용 타임라인).
+- **Triple deliverable**: 매 실행마다 세 산출물.
+  1. `./footage/edit/final.mp4` — 완성본 (자막 번인 + 컬러 합성)
+  2. `./footage/edit/timeline.fcpxml` — Final Cut Pro 임포트용 (컷 + 자막 V2 overlay)
+  3. `./footage/edit/timeline.xml` — Premiere Pro 임포트용 (FCP7 XML, 컷 + 자막 V2 overlay)
+
+  EDL 작성 후 양 NLE 파일은 **단일 명령으로 동시 export**:
+
+  ```bash
+  bash scripts/export_nle_files.sh
+  ```
 
 ## Mode A — 풋티지 편집
 
@@ -47,7 +56,7 @@ video-use SKILL.md의 Hard Rules는 **무조건** 따른다. 이 파일은 두 �
 4. 모션그래픽 오버레이를 병렬 sub-agent로 렌더 (아래 [모션그래픽](#모션그래픽-공통) 참조).
 5. `./footage/edit/edl.json` 작성.
 6. video-use가 segment-단위 ffmpeg extract → 오버레이 합성 → `-c copy` concat → 30ms 오디오 페이드 → 컬러 → **자막은 마지막**에 번인 → `final.mp4`.
-7. EDL → FCPXML 변환 ([공통](#공통-단계) 참조).
+7. EDL → 양 NLE 파일 export (`bash scripts/export_nle_files.sh`) → `timeline.fcpxml` + `timeline.xml`.
 8. 자기평가 루프, 최대 3회 fix+재렌더.
 
 ### 무음 컷 (Mode A 핵심 — ASR 무관)
@@ -141,7 +150,7 @@ per-segment 오버라이드가 top-level 기본값보다 우선.
    - 두 포맷 모두 렌더: `--format mov --codec prores4444 -o output/<id>.mov`(FCP 알파) + `-o output/<id>.mp4`(ffmpeg 번인용)
 5. **`./footage/edit/edl.json`** 작성 — segment별 mp3가 source, hyperframes 렌더가 overlay(전체 segment 길이를 덮음).
 6. **ffmpeg concat**으로 모든 segment 렌더 → `final.mp4`. 오디오는 내레이션 mp3들을 순서대로.
-7. EDL → FCPXML.
+7. EDL → 양 NLE 파일 export (`bash scripts/export_nle_files.sh`) → `timeline.fcpxml` + `timeline.xml`.
 
 ### Edge TTS 보이스 치트시트 (한국어 우선)
 
@@ -167,16 +176,33 @@ per-segment 오버라이드가 top-level 기본값보다 우선.
   - `npx hyperframes render -o output/<name>.mp4` (ffmpeg 번인)
 - 사용 스킬: `hyperframes`(일반), `gsap`/`waapi`(애니메이션), `tailwind`(스타일), `lottie`/`three`(특수). 모두 `./hyperframes/.agents/skills/`에 깔려 있음.
 
-### EDL → FCPXML
+### EDL → 양 NLE 파일 (FCP + Premiere)
+
+매 iteration의 마지막 단계. **단일 명령으로 두 NLE 파일 동시 export**:
 
 ```bash
-~/Developer/video-use/.venv/bin/python \
-  .claude/skills/motion-pipeline/helpers/edl_to_fcpxml.py \
-  ./footage/edit/edl.json \
-  -o ./footage/edit/timeline.fcpxml
+bash scripts/export_nle_files.sh
 ```
 
-매 iteration마다 edl.json을 다시 emit하고 FCPXML을 재변환 — mp4와 FCPXML이 항상 동기.
+내부 동작:
+
+```
+edl.json  ─┬─→ edl_to_fcpxml.py    → footage/edit/timeline.fcpxml  (Final Cut Pro)
+           └─→ edl_to_fcp7_xml.py  → footage/edit/timeline.xml     (Premiere Pro, FCP7 XML)
+```
+
+두 파일 모두 EDL의 cuts(V1) + overlays(V2 자막 mov) + sources를 동일하게 표현. 어느 NLE 사용자든 동일한 작업물 받음.
+
+매 iteration마다 edl.json을 다시 emit하고 위 스크립트 재실행 — mp4와 양 NLE 파일이 항상 동기.
+
+#### NLE별 임포트 가이드
+
+| NLE               | 임포트                                  | 자막                                       |
+| ----------------- | --------------------------------------- | ------------------------------------------ |
+| **Final Cut Pro** | File → Import → XML → `timeline.fcpxml` | 자막 mov가 V2 connected clip으로 자동 포함 |
+| **Premiere Pro**  | File → Import → `timeline.xml`          | 자막 mov가 V2 트랙으로 자동 포함           |
+
+ProRes 4444 알파라 양 NLE 모두 자막 배경 자동 인식.
 
 ## EDL 스키마
 
@@ -250,9 +276,16 @@ npx hyperframes doctor             # 환경 체크
 ~/Developer/video-use/.venv/bin/python ~/Developer/video-use/helpers/transcribe.py <file>
 ~/Developer/video-use/.venv/bin/python ~/Developer/video-use/helpers/timeline_view.py <file>
 
-# EDL → FCPXML (양 모드)
+# EDL → 양 NLE 파일 (양 모드, 단일 명령)
+bash scripts/export_nle_files.sh
+#   → footage/edit/timeline.fcpxml  (Final Cut Pro)
+#   → footage/edit/timeline.xml     (Premiere Pro, FCP7 XML)
+
+# 개별 helper 호출 (필요 시)
 ~/Developer/video-use/.venv/bin/python \
   .claude/skills/motion-pipeline/helpers/edl_to_fcpxml.py edl.json -o timeline.fcpxml
+~/Developer/video-use/.venv/bin/python \
+  .claude/skills/motion-pipeline/helpers/edl_to_fcp7_xml.py edl.json -o timeline.xml
 ```
 
 ## 환경변수
