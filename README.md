@@ -43,6 +43,17 @@ bash scripts/setup.sh
 
 선택사항: [ElevenLabs Scribe](ENV_KEYS.md) — 다중 화자 분리 / 한국어 필러 자동컷이 핵심일 때만.
 
+## AI 에이전트 호환성
+
+| 에이전트                   | 자동 트리거 (자연어 요청)                                            | 수동 명령 실행                    |
+| -------------------------- | -------------------------------------------------------------------- | --------------------------------- |
+| **Claude Code**            | ✅ `CLAUDE.md` + `.claude/skills/motion-pipeline/SKILL.md` 자동 인식 | ✅                                |
+| **Codex / Cursor / Aider** | △ `AGENTS.md` (= CLAUDE.md 심볼릭) 자동 인식                         | ✅                                |
+| **Gemini CLI**             | △ AGENTS.md 일부 인식, 명시적 안내 권장                              | ✅                                |
+| **그 외**                  | ❌ 명시적 안내 필요                                                  | ✅ — bash/python 명령어 실행 가능 |
+
+핵심 인프라(`scripts/*.sh`, `helpers/*.py`)는 어떤 에이전트든 호출 가능. 자세한 호환성 안내는 [AGENTS.md](AGENTS.md).
+
 ## 디렉토리
 
 ```
@@ -63,6 +74,8 @@ bash scripts/setup.sh
 │   └── rerender_subtitles.sh   ← SRT 수정 → 자막 mov 재렌더 + 양 NLE 갱신
 ├── USAGE.md                    ← 모드별 단계별 사용법 + 자막 편집 + FAQ + 트러블슈팅
 ├── ENV_KEYS.md                 ← (선택) ElevenLabs 키 안내
+├── CLAUDE.md                   ← Claude Code 진입 컨텍스트 (자동 인식)
+├── AGENTS.md → CLAUDE.md       ← Codex/Gemini CLI/Cursor 등 호환 (심볼릭)
 └── README.md
 ```
 

@@ -1,4 +1,6 @@
-# 비디오유즈 — Claude Code 진입 컨텍스트
+# 비디오유즈 — AI 에이전트 진입 컨텍스트
+
+> 이 파일은 **`CLAUDE.md`(Claude Code) + `AGENTS.md`(Codex/Cursor/Gemini CLI 등)** 양쪽으로 사용됩니다 — `AGENTS.md`는 `CLAUDE.md`로 가는 심볼릭 링크.
 
 이 repo는 **두 모드 영상 파이프라인**입니다. 자세한 흐름은 [README.md](README.md), [USAGE.md](USAGE.md), [.claude/skills/motion-pipeline/SKILL.md](.claude/skills/motion-pipeline/SKILL.md)에 있습니다.
 
