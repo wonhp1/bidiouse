@@ -62,6 +62,34 @@ ffmpeg -nostdin -hide_banner -i <audio> \
 
 stderr의 `silence_start: X.XXX` / `silence_end: Y.YYY | silence_duration: Z.ZZZ` 라인을 정규식 파싱 → `SilenceRange[]` → wordSnap으로 단어 경계 정렬 → CutSuggestion → 사용자 승인 → EDL의 keep-range로 변환.
 
+### Source 영상 사전 점검 (Mode A FCPXML 산출 시 필수)
+
+EDL → FCPXML 단계는 **세 가지 source 메타데이터에 민감**하다. Mode A 시작 시 자동 점검:
+
+1. **NTSC frame rate** — `ffprobe -show_entries stream=r_frame_rate`. 30000/1001(29.97), 24000/1001(23.976), 60000/1001(59.94)면 EDL에 `fps_num`/`fps_den`을 명시 (helper의 `parse_fps`가 자동 인식하지만 명시가 안전).
+
+2. **한글 경로** — macOS는 NFD로 저장. helper가 NFC로 자동 normalize하지만, FCP가 그래도 거부하면 영문 임시 경로로 사본:
+
+   ```bash
+   mkdir -p /tmp/bidiouse && cp footage/한글영상.MP4 /tmp/bidiouse/source.MP4
+   # EDL의 sources[0].path를 /tmp/bidiouse/source.MP4로 갱신
+   ```
+
+3. **timecode 메타데이터** — DJI/GoPro/일부 카메라는 0이 아닌 timecode(`07:26:28;00` 등)를 박음. FCP가 source 좌표계로 해석하면 우리 0초 기준 EDL과 mismatch:
+   ```bash
+   ffprobe -v error -show_entries stream_tags=timecode \
+     -of default=noprint_wrappers=1 footage/원본.MP4
+   ```
+   `00:00:00:00`이 아니면 strip:
+   ```bash
+   ffmpeg -y -i footage/원본.MP4 -c copy -map_metadata -1 \
+     -timecode 00:00:00:00 /tmp/bidiouse/source.MP4
+   # EDL path 갱신
+   ```
+   stream copy라 영상 픽셀은 무손실, 1분 내 완료.
+
+이 세 점검을 EDL 작성 **전**에 한 번 돌리면 FCPXML 재시도 횟수가 크게 줄어든다.
+
 ## Mode B — 스크립트 → 영상 (한국어 릴스/숏폼 기본 흐름)
 
 **풋티지 0, API 키 0.** Edge TTS 내레이션, Whisper 단어 타임스탬프, hyperframes 비주얼.

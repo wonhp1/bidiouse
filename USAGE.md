@@ -263,3 +263,35 @@ bash scripts/setup.sh   # 이 repo 루트에서 실행 — venv에 edge-tts 복�
 ### 컷이 단어 중간에 떨어짐
 
 video-use Hard Rule 6/7 (단어 경계 스냅)이 적용 안 됐을 수 있음. 트랜스크립트가 비어있거나 `.words.json`이 없으면 발생. 먼저 transcribe부터 재실행.
+
+### FCPXML 임포트 시 "각각의 미디어가 없는 유효하지 않은 편집입니다"
+
+Final Cut Pro의 _"Invalid edit with no corresponding media"_. 16개 클립 모두 같은 에러면 단일 원인. 의심 순서:
+
+**① NTSC frame rate 처리** — 영상이 29.97/23.976/59.94fps인데 EDL에 `fps: 30` 같은 정수만 적힌 경우. 현재 helper(`edl_to_fcpxml.py`)는 NTSC를 자동 인식하지만, EDL을 직접 작성할 때는 `fps_num`/`fps_den` 명시 권장:
+
+```json
+{ "fps_num": 30000, "fps_den": 1001, ... }
+```
+
+**② macOS 한글 경로 NFC/NFD 충돌** — macOS는 한글 파일명을 NFD(자모 분해)로 저장하지만 FCP의 XML 파서는 NFC를 기대. helper가 자동 정규화하지만, 그래도 의심되면 영상을 영문 경로(`~/Movies/`, `/tmp/...`)로 옮겨 회피.
+
+**③ source 영상의 timecode 메타데이터** — DJI/GoPro/일부 카메라는 `07:26:28;00` 같은 카메라 내부 시계를 timecode로 박음. FCP가 source 좌표계로 해석하면 0초 기준 우리 EDL과 mismatch → "유효하지 않은 편집". 해결:
+
+```bash
+# timecode 0으로 리셋 + 영문 임시 경로 사본 (stream copy, 1분 내)
+mkdir -p /tmp/bidiouse
+ffmpeg -y -i footage/원본.MP4 -c copy -map_metadata -1 \
+  -timecode 00:00:00:00 /tmp/bidiouse/source.MP4
+# EDL의 sources[0].path를 /tmp/bidiouse/source.MP4 로 갱신 후 FCPXML 재생성
+```
+
+확인:
+
+```bash
+ffprobe -v error -show_entries stream_tags=timecode \
+  -of default=noprint_wrappers=1 footage/원본.MP4
+# TAG:timecode=00:00:00:00 이면 OK, 다른 값이면 위 명령으로 strip
+```
+
+**④ 다 안 되면 역공학** — FCP에서 영상 직접 drag-drop import → 컷 1~2개 → `File → Export XML` → 그 XML과 우리 것 diff. FCP가 받아들이는 정답 형식이 보임.

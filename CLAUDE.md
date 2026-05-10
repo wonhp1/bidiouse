@@ -61,6 +61,26 @@ ElevenLabs Scribe는 **다중 화자 분리 / 한국어 필러 자동컷이 핵�
 
 hyperframes Whisper large-v3 모델(~3GB) 첫 다운로드 중. 5–15분 정도 걸림. 진행 표시 없을 수 있음 — 사용자에게 미리 알려주기.
 
+### Mode A에서 EDL → FCPXML 만들기 전 source 영상 점검 (필수)
+
+FCP가 "각각의 미디어가 없는 유효하지 않은 편집입니다"를 뱉는 가장 흔한 3원인을 EDL 작성 **전**에 미리 회피한다:
+
+1. **NTSC frame rate 확인** — `ffprobe -show_entries stream=r_frame_rate <video>` → 30000/1001 / 24000/1001 / 60000/1001이면 EDL에 `fps_num`/`fps_den` 명시.
+
+2. **한글 경로 + timecode 동시 회피** — DJI/GoPro 같은 장비는 0이 아닌 timecode(`07:26:28;00` 등)를 박음. 그리고 macOS는 한글 파일명을 NFD로 저장. 두 문제를 한 번에:
+
+   ```bash
+   mkdir -p /tmp/bidiouse
+   ffmpeg -y -i footage/<원본>.MP4 -c copy -map_metadata -1 \
+     -timecode 00:00:00:00 /tmp/bidiouse/source.MP4
+   ```
+
+   이 사본의 절대경로를 EDL의 `sources[0].path`로 사용. stream copy라 영상 무손실, 1분 내.
+
+3. **그래도 거부되면 역공학** — 사용자에게 FCP에서 영상 직접 import → 컷 만들고 → File → Export XML → 그 XML을 받아 우리 출력과 diff. FCP 받아주는 정답 형식이 보임.
+
+자세한 트러블슈팅은 [USAGE.md](USAGE.md)의 "FCPXML 임포트 시..." 섹션.
+
 ## 외부 의존 (받는 사람이 사전 설치 필요)
 
 - macOS 권장 (M-series Apple Silicon이면 더 빠름). Linux도 동작.
