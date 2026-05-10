@@ -42,6 +42,7 @@ import argparse
 import json
 import os
 import sys
+import unicodedata
 from fractions import Fraction
 from urllib.parse import quote
 from xml.dom import minidom
@@ -99,8 +100,11 @@ def format_name(height: int, fps_num: int, fps_den: int) -> str:
 
 
 def file_url(path: str) -> str:
+    """Build file:// URL. macOS는 한글 path를 NFD로 저장하지만
+    Final Cut Pro의 XML 파서는 NFC를 기대한다 — normalize 후 percent-encode."""
     abs_path = os.path.abspath(os.path.expanduser(path))
-    return "file://" + quote(abs_path, safe="/:")
+    nfc_path = unicodedata.normalize("NFC", abs_path)
+    return "file://" + quote(nfc_path, safe="/:")
 
 
 def srt_time(seconds: float) -> str:
