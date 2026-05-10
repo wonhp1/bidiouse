@@ -47,16 +47,55 @@ from urllib.parse import quote
 from xml.dom import minidom
 from xml.etree import ElementTree as ET
 
+NTSC_FPS = {
+    # int(round(fps_float * 1000)) → (num, den)
+    23976: (24000, 1001),
+    23980: (24000, 1001),
+    29970: (30000, 1001),
+    29976: (30000, 1001),
+    59940: (60000, 1001),
+}
 
-def t(seconds: float, fps: int) -> str:
-    """Frame-align seconds and emit FCPXML's 'N/Ds' rational time string."""
-    frames = round(float(seconds) * fps)
+
+def parse_fps(edl: dict) -> tuple[int, int]:
+    """EDL에서 fps_num/fps_den 또는 fps(int|float|list)를 받아 (num, den) 반환."""
+    if "fps_num" in edl and "fps_den" in edl:
+        return int(edl["fps_num"]), int(edl["fps_den"])
+    fps = edl.get("fps", 30)
+    if isinstance(fps, (list, tuple)) and len(fps) == 2:
+        return int(fps[0]), int(fps[1])
+    fps_f = float(fps)
+    key = int(round(fps_f * 1000))
+    if key in NTSC_FPS:
+        return NTSC_FPS[key]
+    return int(round(fps_f)), 1
+
+
+def t(seconds: float, fps_num: int, fps_den: int) -> str:
+    """Frame-align seconds → FCPXML 'N/Ds' rational. NTSC(29.97 등) 정확 처리."""
+    frames = round(float(seconds) * fps_num / fps_den)
     if frames == 0:
         return "0s"
-    f = Fraction(frames, fps)
+    f = Fraction(frames * fps_den, fps_num)
     return (
         f"{f.numerator}s" if f.denominator == 1 else f"{f.numerator}/{f.denominator}s"
     )
+
+
+def frame_duration(fps_num: int, fps_den: int) -> str:
+    """frameDuration = 1초 / fps = fps_den / fps_num."""
+    f = Fraction(fps_den, fps_num)
+    return (
+        f"{f.numerator}s" if f.denominator == 1 else f"{f.numerator}/{f.denominator}s"
+    )
+
+
+def format_name(height: int, fps_num: int, fps_den: int) -> str:
+    """FCP 표기: 1080p30, 2160p2997 등."""
+    fps_f = fps_num / fps_den
+    if fps_den == 1:
+        return f"FFVideoFormat{height}p{int(round(fps_f))}"
+    return f"FFVideoFormat{height}p{int(round(fps_f * 100))}"
 
 
 def file_url(path: str) -> str:
@@ -75,7 +114,7 @@ def srt_time(seconds: float) -> str:
 
 
 def build_fcpxml(edl: dict) -> ET.Element:
-    fps = int(edl.get("fps", 30))
+    fps_num, fps_den = parse_fps(edl)
     width = int(edl.get("width", 1920))
     height = int(edl.get("height", 1080))
     project_name = edl.get("name", "video-use project")
@@ -88,8 +127,8 @@ def build_fcpxml(edl: dict) -> ET.Element:
         resources,
         "format",
         id="r1",
-        name=f"FFVideoFormat{height}p{fps}",
-        frameDuration=f"1/{fps}s",
+        name=format_name(height, fps_num, fps_den),
+        frameDuration=frame_duration(fps_num, fps_den),
         width=str(width),
         height=str(height),
         colorSpace="1-1-1 (Rec. 709)",
@@ -110,7 +149,7 @@ def build_fcpxml(edl: dict) -> ET.Element:
             "id": ref,
             "name": src.get("name", os.path.splitext(os.path.basename(src["path"]))[0]),
             "start": "0s",
-            "duration": t(src.get("duration", 3600), fps),
+            "duration": t(src.get("duration", 3600), fps_num, fps_den),
             "hasVideo": "1",
             "format": "r1",
             "hasAudio": "1" if has_audio else "0",
@@ -137,7 +176,7 @@ def build_fcpxml(edl: dict) -> ET.Element:
             "id": ref,
             "name": ov.get("name", os.path.splitext(os.path.basename(ov["path"]))[0]),
             "start": "0s",
-            "duration": t(ov["duration"], fps),
+            "duration": t(ov["duration"], fps_num, fps_den),
             "hasVideo": "1",
             "format": "r1",
             "hasAudio": "1" if ov_audio else "0",
@@ -165,7 +204,7 @@ def build_fcpxml(edl: dict) -> ET.Element:
         project,
         "sequence",
         format="r1",
-        duration=t(total_dur, fps),
+        duration=t(total_dur, fps_num, fps_den),
         tcStart="0s",
         tcFormat="NDF",
         audioLayout="stereo",
@@ -188,10 +227,10 @@ def build_fcpxml(edl: dict) -> ET.Element:
             spine,
             "asset-clip",
             ref=src_ref[cut["source_id"]],
-            offset=t(cursor, fps),
+            offset=t(cursor, fps_num, fps_den),
             name=cut.get("name", f"cut{i+1}"),
-            start=t(in_t, fps),
-            duration=t(dur, fps),
+            start=t(in_t, fps_num, fps_den),
+            duration=t(dur, fps_num, fps_den),
             format="r1",
             tcFormat="NDF",
         )
@@ -232,10 +271,10 @@ def build_fcpxml(edl: dict) -> ET.Element:
             "asset-clip",
             ref=overlay_refs[j],
             lane=str(ov.get("lane", 1)),
-            offset=t(local_offset, fps),
+            offset=t(local_offset, fps_num, fps_den),
             name=ov.get("name", f"overlay{j+1}"),
             start="0s",
-            duration=t(ov_dur, fps),
+            duration=t(ov_dur, fps_num, fps_den),
             format="r1",
             enabled="1",
         )
@@ -256,9 +295,9 @@ def build_fcpxml(edl: dict) -> ET.Element:
             host_elem,
             "caption",
             lane="-1",
-            offset=t(local_offset, fps),
+            offset=t(local_offset, fps_num, fps_den),
             name="Caption",
-            duration=t(cap_dur, fps),
+            duration=t(cap_dur, fps_num, fps_den),
             role="iTT?captionFormat=ITT.ko",
         )
         style_id = f"ts{k+1}"
