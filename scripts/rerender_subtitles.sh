@@ -28,8 +28,21 @@ step() { echo; echo "── $* ──"; }
 ok() { echo "✓ $*"; }
 fail() { echo "✗ $*" >&2; exit 1; }
 
-[ -f "$REPO/footage/edit/subtitles.srt" ] || fail "footage/edit/subtitles.srt 없음. 먼저 export 필요"
 [ -f "$REPO/footage/edit/edl.json" ] || fail "footage/edit/edl.json 없음. 컷편집 EDL이 있어야 함"
+
+# SRT가 없으면 subtitles.json에서 자동 export (첫 사용 시)
+if [ ! -f "$REPO/footage/edit/subtitles.srt" ]; then
+  if [ -f "$REPO/footage/edit/subtitles.json" ]; then
+    step "0. subtitles.srt 자동 export (subtitles.json → SRT)"
+    "$VENV" "$REPO/.claude/skills/motion-pipeline/helpers/subtitles_to_srt.py" \
+      export "$REPO/footage/edit/subtitles.json" \
+      -o "$REPO/footage/edit/subtitles.srt"
+    ok "footage/edit/subtitles.srt 생성됨 — 편집 후 다시 실행하세요"
+    exit 0
+  else
+    fail "subtitles.srt 와 subtitles.json 둘 다 없음. 먼저 transcribe 필요"
+  fi
+fi
 
 step "1. SRT → subtitles.json"
 "$VENV" "$REPO/.claude/skills/motion-pipeline/helpers/subtitles_to_srt.py" \

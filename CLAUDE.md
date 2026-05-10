@@ -81,6 +81,35 @@ FCP가 "각각의 미디어가 없는 유효하지 않은 편집입니다"를 �
 
 자세한 트러블슈팅은 [USAGE.md](USAGE.md)의 "FCPXML 임포트 시..." 섹션.
 
+### 사용자가 자막 텍스트 수정을 요청할 때 (영구 워크플로우)
+
+자막은 hyperframes 인포그래픽 mov(영상)이라 텍스트 직접 수정 불가. **항상 SRT → 자동 재렌더 → 양 NLE 파일 동시 갱신** 흐름으로 처리한다. 우회 금지.
+
+**트리거 패턴**:
+
+- "자막 텍스트 수정해줘"
+- "5번 자막을 'XX'로 바꿔줘"
+- "자막에 오타 있어"
+- "자막 'YY' 부분 다시 만들어줘"
+
+**자동 흐름**:
+
+1. `footage/edit/subtitles.srt` 존재 확인. 없으면 먼저 export:
+   ```bash
+   ~/Developer/video-use/.venv/bin/python \
+     .claude/skills/motion-pipeline/helpers/subtitles_to_srt.py \
+     export footage/edit/subtitles.json -o footage/edit/subtitles.srt
+   ```
+2. 사용자 요청 반영해서 SRT 수정 (Edit/Write 도구로)
+3. `bash scripts/rerender_subtitles.sh` 실행 — 6단계 자동 (5–15분, 4K mov 렌더 포함)
+4. 완료되면 사용자에게 "NLE에서 timeline.{fcpxml|xml} 다시 import" 안내
+
+**렌더 없이 검증만**: `bash scripts/rerender_subtitles.sh --lint-only` (5초)
+
+**개별 helper 직접 호출 금지** — 항상 `rerender_subtitles.sh`를 진입점으로 (6단계 + 양 NLE export 보장).
+
+자세한 흐름은 [.claude/skills/motion-pipeline/SKILL.md](.claude/skills/motion-pipeline/SKILL.md)의 "자막 수정 워크플로우" 섹션.
+
 ## 외부 의존 (받는 사람이 사전 설치 필요)
 
 - macOS 권장 (M-series Apple Silicon이면 더 빠름). Linux도 동작.

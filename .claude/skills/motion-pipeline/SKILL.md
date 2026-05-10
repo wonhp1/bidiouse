@@ -164,6 +164,47 @@ per-segment 오버라이드가 top-level 기본값보다 우선.
 
 톤 변화는 `--rate "+15%"`(빠르게/설명체), `--rate "-10%"`(느리게/사색조), `--pitch "-3Hz"`(낮게/Bridge용). Edge TTS는 자연어 스타일 디렉팅 미지원 → rate/pitch에 베이크.
 
+## 자막 수정 워크플로우 (Mode A/B 모두 — 옵션 1 정착 흐름)
+
+자막은 hyperframes 인포그래픽 mov(영상)이라 영상 내부 텍스트 직접 수정 불가. **단일 source of truth = `footage/edit/subtitles.srt`**, 명령 한 줄로 양 NLE 파일까지 자동 갱신.
+
+### 사용자가 자막 수정을 요청할 때 자동 흐름
+
+사용자 요청 패턴:
+
+- "자막 텍스트 수정해줘"
+- "5번 자막을 'XX'로 바꿔줘"
+- "자막 'YY' 부분 다시 만들어줘"
+- "자막에 오타 있어"
+
+→ **이 워크플로우를 자동 트리거**:
+
+```
+1. footage/edit/subtitles.srt 가 있으면 그대로 사용,
+   없으면 helpers/subtitles_to_srt.py 로 subtitles.json → SRT 먼저 export
+2. 사용자 요청 반영 (SRT 수정)
+3. bash scripts/rerender_subtitles.sh 실행
+   → SRT → JSON → index.html → 4K alpha mov 렌더 (5–15분)
+   → cut별 mov 분할 → EDL overlays 갱신
+   → timeline.fcpxml + timeline.xml 동시 export
+4. 완료 후 사용자에게 "NLE에서 timeline.{fcpxml|xml} 다시 import" 안내
+```
+
+검증만 빠르게 (렌더 안 함, 5초): `bash scripts/rerender_subtitles.sh --lint-only`
+
+### 디자인 자체 변경 (CSS 수정)
+
+자막 폰트/색/박스 스타일/모션을 바꾸려면 [helpers/build_subtitle_html.py](helpers/build_subtitle_html.py)의 `TEMPLATE` CSS를 수정. 매 재렌더 시 그 템플릿이 `hyperframes/index.html`을 덮어쓴다.
+
+수정 후 동일하게 `bash scripts/rerender_subtitles.sh` — 새 디자인 적용된 mov가 양 NLE 파일에 자동 반영.
+
+### Hard Rules (자막 워크플로우 한정)
+
+1. **subtitles.srt가 single source of truth** — JSON / index.html / mov는 모두 SRT에서 파생. 사용자가 SRT만 편집한다.
+2. **rerender_subtitles.sh가 진입점** — 개별 helper를 직접 호출하지 말고 항상 이 스크립트 사용 (6단계 + 양 NLE export 보장).
+3. **변경마다 양 NLE 파일 갱신** — Mode 무관, 자막이 바뀌면 timeline.fcpxml + timeline.xml 모두 신선해야 한다.
+4. **편집 영상과 자막은 미리 합성하지 않는다** — 항상 NLE 파일에 V1(영상)+V2(자막 mov) 청사진으로 두고 NLE가 import 시 합성.
+
 ## 공통 단계
 
 ### 모션그래픽 (공통)
