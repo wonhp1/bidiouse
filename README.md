@@ -1,8 +1,8 @@
-# 비디오유즈 ([bidiouse](https://github.com/wonhp1/bidiouse))
+# 비디오유즈 https://github.com/wonhp1/video_use
 
 두 모드 영상 파이프라인. **기본은 무료 / 로컬 / 키 0개.**
 
-> Repo: https://github.com/wonhp1/bidiouse
+> Repo: https://github.com/wonhp1/video_use
 > License: [MIT](LICENSE)
 
 | 모드                    | 입력                   | 산출물                                   |
